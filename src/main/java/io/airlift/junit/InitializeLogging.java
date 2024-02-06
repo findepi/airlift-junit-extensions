@@ -13,13 +13,26 @@
  */
 package io.airlift.junit;
 
-import io.airlift.log.Logging;
 import org.junit.jupiter.api.extension.Extension;
 
 public class InitializeLogging
         implements Extension
 {
     static {
-        Logging.initialize();
+        Class<?> loggingClass;
+        try {
+            loggingClass = Class.forName("io.airlift.log.Logging");
+        }
+        catch (ClassNotFoundException ignored) {
+            loggingClass = null;
+        }
+        if (loggingClass != null) {
+            try {
+                loggingClass.getMethod("initialize").invoke(null);
+            }
+            catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
